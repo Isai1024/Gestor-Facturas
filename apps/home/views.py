@@ -73,3 +73,10 @@ def add_user(request):
             return HttpResponseRedirect(reverse('table_user'))
     
     return HttpResponse(html_template.render(context, request))
+
+@login_required(login_url="/login/")
+def validar_factura(request):
+    context = {'segment': 'Facturas'}
+
+    html_template = loader.get_template('home/validarFacturas.html')
+    return HttpResponse(html_template.render(context, request))

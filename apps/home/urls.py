@@ -16,7 +16,9 @@ urlpatterns = [
     
     path('usuarios/agregar', views.add_user, name='add_user'),
 
+    #facturas
+    path('facturas', views.validar_factura, name='validar_factura'),
+
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),
-
 ]
