@@ -80,3 +80,10 @@ def validar_factura(request):
 
     html_template = loader.get_template('home/validarFacturas.html')
     return HttpResponse(html_template.render(context, request))
+
+@login_required(login_url="/login/")
+def detalles_factura(request):
+    context = {'segment': 'Facturas'}
+
+    html_template = loader.get_template('home/visualizacionFactura.html')
+    return HttpResponse(html_template.render(context, request))
