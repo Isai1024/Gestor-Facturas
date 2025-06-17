@@ -10,6 +10,7 @@ from django.template import loader
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.shortcuts import render
+from .models import Factura
 
 
 @login_required(login_url="/login/")
@@ -73,3 +74,17 @@ def add_user(request):
             return HttpResponseRedirect(reverse('table_user'))
     
     return HttpResponse(html_template.render(context, request))
+
+def dashboard(request):
+    total_facturas = Factura.objects.count()
+    facturas_aprobadas = Factura.objects.filter(estatus='aprueba').count()
+    facturas_validadas = Factura.objects.filter(estatus='valida').count()
+    facturas_pendientes = Factura.objects.filter(estatus='subida').count()
+
+    context = {
+        'total_facturas': total_facturas,
+        'facturas_aprobadas': facturas_aprobadas,
+        'facturas_validadas': facturas_validadas,
+        'facturas_pendientes': facturas_pendientes,
+    }
+    return render(request, 'home/index.html', context)
