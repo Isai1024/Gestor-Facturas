@@ -1,0 +1,73 @@
+{% extends 'home/tables.html' %}
+{% load static %}
+
+{% block users_table %}
+<!-- Light table -->
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" class="sort" data-sort="name">
+                  Nombre de usuario
+                </th>
+                <th scope="col" class="sort" data-sort="budget">Nombre</th>
+                <th scope="col" class="sort" data-sort="status">Apellido</th>
+                <th scope="col">Correo</th>
+                <th scope="col" class="sort">Rol</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody class="list">
+              {% for user in users %}
+
+                <tr>
+                  <th scope="row">
+                    <div class="media align-items-center">
+                      <div class="media-body">
+                        <span class="name mb-0 text-sm">{{ user.username }}</span>
+                      </div>
+                    </div>
+                  </th>
+                  <td class="budget">{{ user.first_name }}</td>
+                  <td>{{ user.last_name }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.is_superuser }}</td>
+                  <td class="text-right">
+                    <div class="dropdown">
+                      <a
+                        class="btn btn-sm btn-icon-only text-light"
+                        href="#"
+                        role="button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        <i class="fas fa-ellipsis-v"></i>
+                      </a>
+                      <div
+                        class="dropdown-menu dropdown-menu-right dropdown-menu-arrow"
+                      >
+                        
+                        <a class="dropdown-item" href="#">
+                          <i class="fas fa-user text-muted"></i>
+                          Modificar usuario
+                        </a>
+                        <a class="dropdown-item" href="#">
+                          <i class="fas fa-edit text-primary"></i>
+                          Cambiar permisos
+                        </a>
+                        <a class="dropdown-item" href="#">
+                          <i class="fas fa-trash text-red"></i>
+                          Desactivar usuario
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+{% endblock  %}
