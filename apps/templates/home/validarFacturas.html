@@ -12,8 +12,7 @@
                     <h6 class="h2 text-white d-inline-block mb-0">Facturas</h6>
                     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
-                            <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
-                            <li class="breadcrumb-item"><a href="#">Facturas</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Validar</li>
                         </ol>
                     </nav>
@@ -69,7 +68,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="" class="btn btn-sm btn-primary" title="Ver">
+                                     <a href="{% url 'detalles_factura' %}" class="btn btn-sm btn-primary" title="Ver">
                                         <i class="ni ni-active-40"></i>
                                     </a>
 
@@ -96,7 +95,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="" class="btn btn-sm btn-primary" title="Ver">
+                                    <a href="{% url 'detalles_factura' %}" class="btn btn-sm btn-primary" title="Ver">
                                         <i class="ni ni-active-40"></i>
                                     </a>
                                 </td>
@@ -122,7 +121,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="" class="btn btn-sm btn-primary" title="Ver">
+                                     <a href="{% url 'detalles_factura' %}" class="btn btn-sm btn-primary" title="Ver">
                                         <i class="ni ni-active-40"></i>
                                     </a>
                                 </td>
@@ -148,37 +147,12 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="" class="btn btn-sm btn-primary" title="Ver">
+                                     <a href="{% url 'detalles_factura' %}" class="btn btn-sm btn-primary" title="Ver">
                                         <i class="ni ni-active-40"></i>
                                     </a>
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">
-                                    <div class="media align-items-center">
-                                        <div class="media-body">
-                                            <span class="name mb-0 text-sm">Argon Design System</span>
-                                        </div>
-                                    </div>
-                                </th>
-                                <td class="budget">
-                                    $2500 USD
-                                </td>
-                                <td class="budget">
-                                    23 febrero 2025
-                                </td>
-                                <td>
-                                    <span class="badge badge-dot mr-4">
-                                        <i class="bg-warning"></i>
-                                        <span class="status">pending</span>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="" class="btn btn-sm btn-primary" title="Ver">
-                                        <i class="ni ni-active-40"></i>
-                                    </a>
-                                </td>
-                            </tr>
+    
                         </tbody>
                     </table>
                 </div>

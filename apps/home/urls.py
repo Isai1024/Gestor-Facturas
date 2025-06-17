@@ -18,7 +18,12 @@ urlpatterns = [
 
     #facturas
     path('facturas', views.validar_factura, name='validar_factura'),
+    
+    #facturas
+    path('facturas/detalles/', views.detalles_factura, name='detalles_factura'),
 
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),
 ]
+
+
