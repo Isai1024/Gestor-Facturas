@@ -8,8 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from django.contrib.auth.models import User
-from django.shortcuts import render
+from django.contrib.auth.models import User, Group, Permission
+from django.shortcuts import redirect
 
 
 @login_required(login_url="/login/")
@@ -52,25 +52,50 @@ def list_users(request):
     context = {'segment': 'tables'}
     html_template = loader.get_template('home/view_users.html')
     
-    users = User.objects.all()
+    users = User.objects.all().order_by('id')
     context['users'] = users
     
     return HttpResponse(html_template.render(context, request))
 
 @login_required(login_url="/login/")
-def add_user(request):
-    context = {'segment': 'add_user'}
-    html_template = loader.get_template('home/form.html')
+def view_user(request):
+    print("Adding user ", request.method)
     
     if request.method == 'POST':
+        print("POST request received")
         username = request.POST.get('username')
-        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         email = request.POST.get('email')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
         
-        if username and password and email:
-            user = User.objects.create_user(username=username, password=password, email=email)
-            user.save()
-            return HttpResponseRedirect(reverse('table_user'))
+        print("Username:", username)
+        print("First Name:", first_name)
+        print("Last Name:", last_name)
+        print("Email:", email)
+        print("Role:", role)  
+        print("Password:", password)
+        
+        
+        group = Group.objects.get(name=role)
+        
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password
+        )
+            
+        user.save()
+            
+        user.groups.add(group)
+            
+        return HttpResponseRedirect(reverse('table_user'))
+        
+    context = {'segment': 'add_user'}
+    html_template = loader.get_template('home/form.html')
     
     return HttpResponse(html_template.render(context, request))
 
