@@ -25,10 +25,10 @@ urlpatterns = [
     path('usuarios/eliminar/<int:id>', views.desactivate_or_activate_user, name='delete_or_active_user'),
 
     #facturas
-    path('facturas', views.validar_factura, name='validar_factura'),
-    
+    path('facturas/', views.validar_factura, name='validar_factura'),
+
     #facturas
-    path('facturas/detalles/', views.detalles_factura, name='detalles_factura'),
+    path('facturas/detalles/<int:id>/', views.detalles_factura, name='detalles_factura'),
 
     #formulario de facturas 
     path('facturas/agregar/', views.form_facturas, name='form_facturas'),

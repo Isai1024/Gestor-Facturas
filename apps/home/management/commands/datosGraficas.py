@@ -17,7 +17,7 @@ class Command(BaseCommand):
         archivo_simulado = ContentFile(b"%PDF-1.4\n%Fake PDF content\n", name="ejemplo.pdf")
 
         factura1 = Factura.objects.create(
-            estatus='deniega',
+            estatus='Subida',
             cliente='Empresa Falsa',
             usuario=usuario,
             archivo=archivo_simulado,

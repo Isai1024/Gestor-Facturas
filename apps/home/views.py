@@ -262,17 +262,21 @@ def desactivate_or_activate_user(request, id):
 
 @login_required(login_url="/login/")
 def validar_factura(request):
-    context = {'segment': 'Facturas'}
-
-    html_template = loader.get_template('home/validarFacturas.html')
-    return HttpResponse(html_template.render(context, request))
+    facturas = Factura.objects.all().select_related('usuario')
+    context = {
+        'segment': 'Facturas',
+        'facturas': facturas,
+    }
+    return render(request, 'home/validarFacturas.html', context)
 
 @login_required(login_url="/login/")
-def detalles_factura(request):
-    context = {'segment': 'Facturas'}
-
-    html_template = loader.get_template('home/visualizacionFactura.html')
-    return HttpResponse(html_template.render(context, request))
+def detalles_factura(request, id):
+    factura = Factura.objects.get(id=id) 
+    context = {
+        'factura': factura,
+        'segment': 'Facturas',
+    }
+    return render(request, 'home/visualizacionFactura.html', context)
 
 @login_required(login_url="/login/")
 def form_facturas(request):
