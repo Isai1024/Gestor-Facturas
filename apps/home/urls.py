@@ -11,6 +11,8 @@ urlpatterns = [
     # The home page
     path('', views.index, name='home'),
 
+    path('profile/', views.profile_view, name='profile'),
+
     # User management
     path('usuarios', views.list_users, name='table_user'),
     
