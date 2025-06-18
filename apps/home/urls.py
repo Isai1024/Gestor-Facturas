@@ -11,10 +11,10 @@ urlpatterns = [
     # The home page
     path('', views.index, name='home'),
 
-    # List users
+    # User management
     path('usuarios', views.list_users, name='table_user'),
     
-    path('usuarios/agregar', views.add_user, name='add_user'),
+    path('usuarios/agregar', views.view_user, name='view_user'),
 
     #facturas
     path('facturas', views.validar_factura, name='validar_factura'),

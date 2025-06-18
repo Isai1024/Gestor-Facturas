@@ -1,544 +1,105 @@
 {% extends "home/tables.html" %}
 {% load static %}
 
-{% block extracss %}
+{% block user_form %}
 
-<style>
-  .overlay-loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1050;
-    background-color: rgb(255, 255, 255); /* Fondo blanco translúcido */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    pointer-events: all;
-}
-</style>
-
-{% endblock extracss%}
-
-{% block titulos %}
-    <div class="page-title d-flex flex-column me-3">
-        
-        <h1 class="d-flex text-white fw-bold my-1 fs-3"> [[ oficina_guardada ? 'Administrador de Oficina' : 'Agregar Oficina' ]]</h1>
-        <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-1">
-            <li class="breadcrumb-item text-white opacity-75">
-                <a href="listar" class="text-white text-hover-primary">Lista de oficinas</a>
-            </li>
-            <li class="breadcrumb-item">
-                <span class="bullet bg-white w-5px h-2px"></span>
-            </li>
-            <li class="breadcrumb-item text-white opacity-75">Agregar</li>
-        </ul>
-    </div>
-{% endblock titulos %}
-
-
-{% block acciones %}
-
-
-<a href="<listar>" class="btn btn-light me-3" id="kt_toolbar_back_button">
-     Regresar
-</a>
-
-<button type="submit" form="form_oficina" class="btn btn-primary" :disabled="loading" id="kt_toolbar_primary_button">
-    <span v-if="!loading">
-        [[ oficina_guardada ? 'Actualizar' : 'Guardar' ]]
-    </span>
-    <span v-else><i class="fa fa-spinner fa-spin"></i> [[ oficina_guardada ? 'Actualizando...' : 'Guardando...' ]]</span>
-</button>
-
-
-{% endblock acciones %}
-
-
-{% block fullcontenido %}
-
-    <div v-if="loadingData" class="overlay-loading">
-        <div class="spinner-border text-primary" role="status"></div>
-        <div class="mt-4 text-muted fs-5">Cargando...</div>
-    </div>
-
-    <div id="kt_content_container" class="d-flex flex-column-fluid align-items-start container-fluid px-10">
-        <div class="content flex-row-fluid" id="kt_content">
-           <div class="card " >
-                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
-                    <h3 class="card-title fw-bold text-gray-800">Información general de la oficina</h3>
-                </div>
-
-                 <div class="card-body py-10 px-lg-17">
-                    <form id="form_oficina" @submit.prevent="saveOrUpdateOffice">
-                        <!-- Nombre y Código -->
-                        <div class="row g-6 mb-6">
-                            <div class="col-md-6">
-                                <label class="required form-label fs-6 fw-bold text-gray-700">Nombre de la oficina</label>
-                                <input type="text" class="form-control form-control-lg" placeholder="Ej. Oficina Monterrey" v-model="info.name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="required form-label fs-6 fw-bold text-gray-700">Código</label>
-                                <input type="text" class="form-control form-control-lg" placeholder="Ej. MTY01" v-model="info.code" required>
-                            </div>
-                        </div>
-
-                        <!-- Teléfono y Correo -->
-                        <div class="row g-6 mb-6">
-                            <div class="col-md-6">
-                                <label class="form-label fs-6 fw-bold text-gray-700">Teléfono</label>
-                                <input type="text" class="form-control form-control-lg" placeholder="Ej. 8123456789" v-model="info.phone">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fs-6 fw-bold text-gray-700">Correo electrónico</label>
-                                <input type="email" class="form-control form-control-lg" placeholder="Ej. contacto@empresa.com" v-model="info.email">
-                            </div>
-                        </div>
-
-                        <!-- Dirección -->
-                        <div class="row g-6 mb-6">
-                            <div class="col-md-12">
-                                <label class="form-label fs-6 fw-bold text-gray-700">Dirección</label>
-                                <textarea class="form-control form-control-lg" rows="3" placeholder="Ej. Av. Revolución #123, Col. Centro, Monterrey, NL" v-model="info.address"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Estado activo/inactivo -->
-                        <div class="row g-6 mb-6">
-                            <div class="col-md-6 d-flex align-items-center">
-                                <div class="form-check form-switch form-check-custom form-check-solid">
-                                    <input class="form-check-input h-30px w-50px" type="checkbox" id="active" v-model="info.is_active">
-                                    <label class="form-check-label fw-bold text-gray-700 ms-3" for="active">Oficina activa</label>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="separator my-10"></div>
-
-                    <div v-if="oficina_guardada">
-                        <div class="mb-10">
-                            <div class="d-flex justify-content-between align-items-center mb-7">
-                                <h4 class="fw-bold text-gray-800">Usuarios asignados</h4>
-                                <button class="btn btn-primary btn-sm" @click="abrirModalUsuario">
-                                    <i class="fas fa-user-plus"></i>
-                                </button>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-hover table-row-bordered table-row-gray-300 align-middle gs-7 gy-4">
-                                    <thead class="bg-light-primary">
-                                        <tr class="fw-bold text-gray-700">
-                                            <th class="min-w-150px">Nombre</th>
-                                            <th class="min-w-150px">Rol</th>
-                                            <th class="min-w-150px">Permisos</th>
-                                            <th class="min-w-150px text-end">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody v-if="loadingUsuarios">
-                                        <tr>
-                                            <td colspan="4" class="text-center py-10">
-                                                <span class="spinner-border text-primary me-2"></span>
-                                                <span class="fw-bold fs-5 text-gray-700">Cargando usuarios...</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                    <tbody v-else>
-                                        <tr v-for="usuario in info.usuarios" :key="usuario.id">
-                                            <td>[[ usuario.name ]]</td>
-                                            <td>[[ usuario.groups.join(', ') ]]</td>
-                                            <td>
-                                                <template v-if="usuario.permissions.length === 0">
-                                                    <button class="btn btn-light-warning btn-sm fw-bold"
-                                                            @click.prevent="openPermisosModal(usuario)">
-                                                        <i class="fas fa-key me-2"></i>Agregar permisos
-                                                    </button>
-                                                </template>
-                                                <template v-else>
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <span>
-                                                            <template v-for="(perm, idx) in usuario.permissions.slice(0, 2)" :key="idx">
-                                                                <span class="me-2">[[ perm ]]</span>
-                                                            </template>
-                                                            <span v-if="usuario.permissions.length > 2" class="text-muted fst-italic">
-                                                                y [[ usuario.permissions.length - 2 ]] más...
-                                                            </span>
-                                                        </span>
-                                                        <button class="btn btn-icon btn-sm btn-light-primary ms-2"
-                                                                @click.prevent="openPermisosModal(usuario)" title="Editar permisos">
-                                                            <i class="fas fa-pen"></i>
-                                                        </button>
-                                                    </div>
-                                                </template>
-                                            </td>
-                                            <td class="text-end">
-                                                <button class="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
-                                                        @click.prevent="quitarUsuario(usuario.id)" title="Quitar usuario">
-                                                    <i class="fas fa-user-times fs-4"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="info.usuarios.length === 0">
-                                            <td colspan="4" class="text-center py-10 text-muted">
-                                                <i class="fas fa-info-circle fs-2 me-2"></i> No hay usuarios asignados a esta oficina.
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                        
-                </div>
-
-            </div>          
-            
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Agregar Usuario</h3>
         </div>
-        <!--end::Modal dialog-->
+        <div id="app" class="card-body">
+        <form @submit.prevent="submitForm">
+          <div class="form-group">
+              <label for="username">Nombre de usuario</label>
+              <input v-model="username" type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+              <label for="first_name">Nombre</label>
+              <input v-model="first_name" type="text" class="form-control" id="first_name" name="first_name" required>
+            </div>
+            <div class="form-group">
+              <label for="last_name">Apellido</label>
+              <input v-model="last_name" type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Correo electrónico</label>
+              <input v-model="email" type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input v-model="password" type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+              <label for="role">Rol</label>
+              <select v-model="role" class="form-control" id="role" name="role" required>
+                <option disabled value="">Selecciona una opción</option>
+                <option value="operador">Operador</option>
+                <option value="admin">Administrador</option>
+                <option value="capturista">Capturista</option>
+            </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Modal para Crear Usuario -->
-    <div class="modal fade" id="modalAddUser" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-            <div class="modal-header bg-light-primary">
-                <h5 class="modal-title fw-bold text-gray-800">Crear Usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body scroll-y mx-5 mx-xl-10 my-7">
-                <form id="formAddUser" class="form">
-                <div class="mb-5">
-                    <label class="required form-label">Nombre completo</label>
-                    <input type="text" class="form-control form-control-lg" v-model="nuevo_usuario.name" required>
-                </div>
-                <div class="mb-5">
-                    <label class="required form-label">Usuario</label>
-                    <input type="text" class="form-control form-control-lg" v-model="nuevo_usuario.username" required>
-                </div>
-                <div class="mb-5">
-                    <label class="required form-label">Contraseña</label>
-                    <input type="password" class="form-control form-control-lg" v-model="nuevo_usuario.password1" required>
-                </div>
-                <div class="mb-5">
-                    <label class="required form-label">Confirmar Contraseña</label>
-                    <input type="password" class="form-control form-control-lg" v-model="nuevo_usuario.password2" required>
-                </div>
-                <div class="mb-5">
-                    <label class="required form-label">Rol</label>
-                    <select id="select_usuario_add" class="form-select form-select-lg" v-model="nuevo_usuario.group" data-control="select2" data-placeholder="Seleccione un rol" data-dropdown-parent="#modalAddUser" required>
-                        <option disabled value="">Selecciona una opción</option>
-                        <option v-for="item in roles_disponibles" :value="item.id">[[ item.name ]]</option>
-                    </select>
-                </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" @click="crearUsuario()" :disabled="loading">
-                <span v-if="!loading"><i class="fas fa-save me-2"></i>Guardar</span>
-                <span v-else><i class="fas fa-spinner fa-spin me-2"></i>Guardando...</span>
-                </button>
-            </div>
-            </div>
-        </div>
-    </div>
+{% endblock user_form %}
 
-    <!-- Modal control de permisos -->
-    <div class="modal fade" id="modalPermisos" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl"> <!-- CAMBIO AQUÍ -->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Asignar permisos</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
+{% block VueJS %}
 
-                <div class="modal-body">
-                    <p v-if="usuarioPermisos" class="fw-bold mb-5">
-                        Usuario: [[ usuarioPermisos.name ]]
-                    </p>
-
-                    <div class="mb-5">
-                        <label for="selectPermisos" class="form-label fw-bold">Permisos disponibles</label>
-                        <select id="selectPermisos" class="form-select" multiple data-control="select2"
-                                data-placeholder="Selecciona uno o varios permisos"
-                                data-dropdown-parent="#modalPermisos" v-model="permisosSeleccionados" style="min-height: 300px;">
-                            <option v-for="perm in permisosDisponibles" :value="perm.id">[[ perm.name ]]</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" @click="asignarPermisos()" :disabled="loading">
-                        <span v-if="!loading"><i class="fas fa-save me-2"></i>Guardar</span>
-                        <span v-else><i class="fas fa-spinner fa-spin me-2"></i>Guardando...</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
-{% endblock fullcontenido %}
-
-
-{% block extrajs %}
-
-<script src="{% static 'assets/js/css_js/vue.3.2.36.global.js' %}"></script>
-
+<script src="{% static 'assets/js/vue.3.2.36.global.js' %}"></script>
 
 <script type="module">
-    // Selects
-    $(document.body).on("change","#select_usuario_add",function(){
-        window.vue_.nuevo_usuario.group = this.value;
-        window.vue_.initSelect2();
-    });
-
-    $(document.body).on("change", "#selectPermisos", function () {
-        const selected = $(this).val();  // arreglo de IDs (strings)
-        window.vue_.permisosSeleccionados = selected ? selected.map(id => parseInt(id)) : [];
-    });
 
     const private_keys = {
         CSRF_MIDDLEWARE_TOKEN: "{{ csrf_token }}"
     };
 
+    var err = document.getElementById("app");
 
-    import modalMessage from '{% static "assets/js/global/modal_message.js" %}';
-    import formatError from '{% static "assets/js/global/formatError.js" %}';
-
-    const { createApp } = Vue;
-    var vue_ = createApp({
+    const app = Vue.createApp({
         delimiters: ['[[', ']]'],
         data() {
             return {
-                 info: {
-                    name: '',
-                    code: '',
-                    address: '',
-                    phone: '',
-                    email: '',
-                    is_active: true,
-                    id: ''
-                },
-                loading: false,          
-                loadingData: false, 
-                oficina_guardada: false,                 
-                nuevo_usuario: {
-                    name: "",
-                    username: "",
-                    password1: "",
-                    password2: "",
-                    group: ""
-                },
-                roles_disponibles: [],
-                loadingUsuarios: false,
-                usuarioPermisos: null,
-                permisosDisponibles: [],
-                permisosSeleccionados: [],
+                username: '',
+                first_name: '',
+                last_name: '',
+                email: '',
+                password: '',
+                role: '',
             };
         },
         methods: {
-            // Funcionalidad
-            saveOrUpdateOffice() {
-                if (this.oficina_guardada) {
-                    this.updateOffice();
-                } else {
-                    this.saveOffice();
-                }
-            },
-            saveOffice() {
-                console.log('guardadno')
-                const formElement = document.getElementById("form_oficina");
-                if (formElement.reportValidity()) {
-                    this.loading = true;
-                    $.post("<crear>", {
-                        info: JSON.stringify(this.info),
-                        csrfmiddlewaretoken: private_keys.CSRF_MIDDLEWARE_TOKEN,
-                    })
-                    .done((response) => {
-                        // Obtener el ID de la empresa recién creada
-                        const oficina_id = response.id;
+            submitForm() {
+                const formData = {
+                    username: this.username,
+                    first_name: this.first_name,
+                    last_name: this.last_name,
+                    email: this.email,
+                    password: this.password,
+                    role: this.role,
+                    csrfmiddlewaretoken: private_keys.CSRF_MIDDLEWARE_TOKEN
+                };
 
-                        // Cargar los datos completos de la empresa
-                        this.loadOficinaData(oficina_id);
-                        
-                        modalMessage(response.message || "Oficina guardada correctamente", "success");
-
-                        
-                    })
-                    .fail((data) => {
-                        const msg = formatError(data);
-                        modalMessage("Error al guardar: " + msg, "error");
-                    })
-                    .always(() => {
-                        this.loading = false;
-                    });
-                }
-            },
-            updateOffice() {
-                const formElement = document.getElementById("form_oficina");
-                if (formElement.reportValidity()) {
-                    this.loading = true;
-                    $.post("actualizar", {
-                        info: JSON.stringify(this.info),
-                        csrfmiddlewaretoken: "{{ csrf_token }}"
-                    })
-                    .done((response) => {
-                        modalMessage(response.message, "success");
-                    })
-                    .fail((data) => {
-                        const msg = formatError(data);
-                        modalMessage("Error al actualizar: " + msg, "error");
-                    })
-                    .always(() => {
-                        this.loading = false;
-                    });
-                }
-            },
-            loadOficinaData(oficinaId) {
-                this.loadingUsuarios = true;
-                this.loadingData = true;
-                $.get("tomar oficinas", {
-                    id: oficinaId, 
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                })
-                .done((data) => {
-                    this.info = {
-                        id: data.id,
-                        name: data.name,
-                        code: data.code,
-                        address: data.address,
-                        phone: data.phone,
-                        email: data.email,
-                        is_active: data.is_active,
-                        usuarios: data.usuarios || [],  // 👈 AQUÍ ASIGNAS LOS USUARIOS
-
-
-                    };
-
-                    this.oficina_guardada = true;
-                })
-                .fail((data) => {
-                    const msg = formatError(data);
-                    modalMessage("Error al cargar los datos: " + msg, "error");
-                })
-                .always(() => {
-                    this.loadingUsuarios = false;
-                    this.loadingData = false;
-                });
-            },
-            abrirModalUsuario() {
-                $('#modalAddUser').modal('show');
-            },
-            obtenerRoles() {
-                $.get("<tomar roles>", {
-                    csrfmiddlewaretoken: "{{ csrf_token }}"
-                })
-                .done((data) => {
-                    this.roles_disponibles = data;
-                });
-            },
-            crearUsuario() {
-                if (this.nuevo_usuario.password1 !== this.nuevo_usuario.password2) {
-                    modalMessage("Las contraseñas no coinciden.", "error");
-                    return;
-                }
-                console.log(this.nuevo_usuario)
-                this.loading = true;
-                $.post("<crear>", {
-                    info: JSON.stringify(this.nuevo_usuario),
-                    oficina_id: this.info.id,
-                    csrfmiddlewaretoken: "{{ csrf_token }}"
-                })
-                .done((response) => {
-                    modalMessage("Usuario creado correctamente.", "success");
-                    this.nuevo_usuario = { name: "", username: "", password1: "", password2: "", group: "" };
-                    $('#modalAddUser').modal('hide');
-                    this.loadOficinaData(this.info.id);  // recargar usuarios
-                })
-                .fail((data) => {
-                    const msg = formatError(data);
-                    modalMessage("Error al crear el usuario: " + msg, "error");
-                })
-                .always(() => {
-                    this.loading = false;
-                });
-            },
-            initSelect2: function() {
-                this.$nextTick(function() {
-                    $('.form-select').select2();
-                });
-            },
-            openPermisosModal(usuario) {
-                this.usuarioPermisos = usuario;
-                this.permisosSeleccionados = usuario.permission_ids || [];
-
-                // Mostrar modal
-                $('#modalPermisos').modal('show');
-
-                // Refrescar Select2
-                this.$nextTick(() => {
-                    const $select = $('#selectPermisos');
-                    $select.select2({
-                        dropdownParent: $('#modalPermisos'),
-                        width: '100%',
-                        placeholder: 'Selecciona uno o varios permisos',
-                    }).val(this.permisosSeleccionados).trigger('change');
-                });
-            },
-            obtenerPermisos(usuario) {
-                $.get("<tomar permisos>", (data) => {
-                    this.permisosDisponibles = data;
-                });
-            },
-            asignarPermisos() {
-                if (!this.usuarioPermisos) {
-                    modalMessage("Usuario no válido.", "error");
-                    return;
-                }
-
-                this.loading = true;
-
-                $.post("<dar permisos>", {
-                    user_id: this.usuarioPermisos.id,
-                    permisos: this.permisosSeleccionados,
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                })
-                .done((response) => {
-                    modalMessage(response.message || "Permisos actualizados correctamente.", "success");
-
-                    this.loadOficinaData(this.info.id);
-                    $('#modalPermisos').modal('hide');
-
-                    if (this.permisosSeleccionados.length === 0) {
-                         modalMessage("El usuario quedó sin permisos asignados.", "info");
-                    }
-                })
-                .fail((data) => {
-                    const msg = formatError(data);
-                    modalMessage("Error al asignar permisos: " + msg, "error");
-                })
-                .always(() => {
-                    this.loading = false;
+                $.post("{% url 'view_user' %}", formData, function(data) {
+                    console.log('Success:', data);
+                    window.location.href = "{% url 'table_user' %}";
+                }).fail(function(error) {
+                    console.error('Error:', error);
+                    err.innerHTML = `<div class="alert alert-danger" role="alert">
+                      ${JSON.stringify(formData)} - ${error.responseText} 
+                    </div>`;
                 });
             }
+        }
+    }).mount('#app');
 
-        },
-        mounted: function() {
-            {% if oficina_id %}
-                this.loadOficinaData({{ oficina_id }});
-            {% endif %}
-            this.obtenerRoles();      
-            this.obtenerPermisos();         
-        },
-    }).mount('#app_vuejs');
-
-    window.vue_ = vue_;
+    window.app = app;
 </script>
 
-{% endblock extrajs %}
+{% endblock VueJS %}

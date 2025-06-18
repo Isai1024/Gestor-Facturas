@@ -24,14 +24,14 @@ def index(request):
     facturas_este_mes = Factura.objects.filter(fecha__gte=inicio_mes_actual)
     total_este_mes = facturas_este_mes.count()
     aprobadas_este_mes = facturas_este_mes.filter(estatus='aprueba').count()
-    validadas_este_mes = facturas_este_mes.filter(estatus='valida').count()
+    denegadas_este_mes = facturas_este_mes.filter(estatus='deniega').count()
     pendientes_este_mes = facturas_este_mes.filter(estatus='subida').count()
 
-    # Conteos para el mes pasado
+    # Conteos para el mes pasado2
     facturas_mes_pasado = Factura.objects.filter(fecha__range=(inicio_mes_pasado, fin_mes_pasado))
     total_mes_pasado = facturas_mes_pasado.count()
     aprobadas_mes_pasado = facturas_mes_pasado.filter(estatus='aprueba').count()
-    validadas_mes_pasado = facturas_mes_pasado.filter(estatus='valida').count()
+    denegadas_mes_pasado = facturas_mes_pasado.filter(estatus='deniega').count()
     pendientes_mes_pasado = facturas_mes_pasado.filter(estatus='subida').count()
 
     def calcular_porcentaje(actual, anterior):
@@ -42,13 +42,13 @@ def index(request):
     context = {
         'segment': 'index',
         'total_facturas': total_este_mes,
-        'facturas_aprobadas': aprobadas_este_mes,
-        'facturas_validadas': validadas_este_mes,
         'facturas_pendientes': pendientes_este_mes,
+        'facturas_aprobadas': aprobadas_este_mes,
+        'facturas_denegadas': denegadas_este_mes,
         'cambio_total': calcular_porcentaje(total_este_mes, total_mes_pasado),
-        'cambio_aprobadas': calcular_porcentaje(aprobadas_este_mes, aprobadas_mes_pasado),
-        'cambio_validadas': calcular_porcentaje(validadas_este_mes, validadas_mes_pasado),
         'cambio_pendientes': calcular_porcentaje(pendientes_este_mes, pendientes_mes_pasado),
+        'cambio_aprobadas': calcular_porcentaje(aprobadas_este_mes, aprobadas_mes_pasado),
+        'cambio_denegadas': calcular_porcentaje(denegadas_este_mes, denegadas_mes_pasado),
     }
 
     return render(request, 'home/index.html', context)
@@ -85,25 +85,50 @@ def list_users(request):
     context = {'segment': 'tables'}
     html_template = loader.get_template('home/view_users.html')
     
-    users = User.objects.all()
+    users = User.objects.all().order_by('id')
     context['users'] = users
     
     return HttpResponse(html_template.render(context, request))
 
 @login_required(login_url="/login/")
-def add_user(request):
-    context = {'segment': 'add_user'}
-    html_template = loader.get_template('home/form.html')
+def view_user(request):
+    print("Adding user ", request.method)
     
     if request.method == 'POST':
+        print("POST request received")
         username = request.POST.get('username')
-        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         email = request.POST.get('email')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
         
-        if username and password and email:
-            user = User.objects.create_user(username=username, password=password, email=email)
-            user.save()
-            return HttpResponseRedirect(reverse('table_user'))
+        print("Username:", username)
+        print("First Name:", first_name)
+        print("Last Name:", last_name)
+        print("Email:", email)
+        print("Role:", role)  
+        print("Password:", password)
+        
+        
+        group = Group.objects.get(name=role)
+        
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password
+        )
+            
+        user.save()
+            
+        user.groups.add(group)
+            
+        return HttpResponseRedirect(reverse('table_user'))
+        
+    context = {'segment': 'add_user'}
+    html_template = loader.get_template('home/form.html')
     
     return HttpResponse(html_template.render(context, request))
 
