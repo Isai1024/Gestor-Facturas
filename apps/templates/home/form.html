@@ -56,12 +56,14 @@
 
 <script type="module">
 
+    // storage the CSRF token for AJAX requests
     const private_keys = {
         CSRF_MIDDLEWARE_TOKEN: "{{ csrf_token }}"
     };
 
     var err = document.getElementById("app");
 
+    // Initialize Vue.js application
     const app = Vue.createApp({
         delimiters: ['[[', ']]'],
         data() {
@@ -75,6 +77,7 @@
             };
         },
         methods: {
+            // Function to add a new user
             submitForm() {
                 const formData = {
                     username: this.username,
@@ -92,7 +95,7 @@
                 }).fail(function(error) {
                     console.error('Error:', error);
                     err.innerHTML = `<div class="alert alert-danger" role="alert">
-                      ${JSON.stringify(formData)} - ${error.responseText} 
+                      ${error.responseText} 
                     </div>`;
                 });
             }
