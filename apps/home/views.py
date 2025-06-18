@@ -9,10 +9,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Factura
 from django.utils import timezone
 from datetime import timedelta
+from .forms import FacturaForm
 
 def index(request):
     ahora = timezone.now()
@@ -133,8 +134,11 @@ def view_user(request):
 
 @login_required(login_url="/login/")
 def validar_factura(request):
-    context = {'segment': 'Facturas'}
-
+    facturas = Factura.objects.filter(usuario=request.user)
+    context = {
+        'segment': 'Facturas',
+        'facturas': facturas
+        }
     html_template = loader.get_template('home/validarFacturas.html')
     return HttpResponse(html_template.render(context, request))
 
@@ -151,3 +155,16 @@ def form_facturas(request):
 
     html_template = loader.get_template('home/form-facturas.html')
     return HttpResponse(html_template.render(context, request))
+
+@login_required
+def agregar_factura(request):
+    if request.method == 'POST':
+        form = FacturaForm(request.POST, request.FILES)
+        if form.is_valid():
+            factura = form.save(commit=False)
+            factura.usuario = request.user
+            factura.save() 
+            return redirect('validar_factura') 
+    else:
+        form = FacturaForm()
+    return render(request, 'home/form_facturas.html', {'form': form})
