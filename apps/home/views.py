@@ -109,6 +109,7 @@ def pages(request):
         html_template = loader.get_template('home/page-500.html')
         return HttpResponse(html_template.render(context, request))
 
+# Show all users order by ID
 @login_required(login_url="/login/")
 def list_users(request):
     context = {'segment': 'tables'}
@@ -120,13 +121,23 @@ def list_users(request):
     
     return HttpResponse(html_template.render(context, request))
 
-# Add a new user with login required
+# Add a new user
+"""
+request body {
+    "username": "username",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "A valid email",
+    "password": "Password",
+    "role": "Role Name"  # This should be an existing group name
+}
+"""
 @login_required(login_url="/login/")
 def view_user(request):
     print("Adding user ", request.method)
     
     if request.method == 'POST':
-        print("POST request received")
+        print("POST request received to add user")
     
         # Get user data from the form
         username = request.POST.get('username')
@@ -155,10 +166,99 @@ def view_user(request):
             
         return HttpResponseRedirect(reverse('table_user'))
         
-    context = {'segment': 'add_user'}
+    context = {'segment': 'Agregar'}
     html_template = loader.get_template('home/form.html')
     
     return HttpResponse(html_template.render(context, request))
+
+# Edit a user
+"""
+request body {
+    "username": "New Username",
+    "first_name": "New First Name",
+    "last_name": "New Last Name",
+    "email": "New valid email",
+    "password": "New Password" # Password can be empty to keep the old one
+}
+"""
+@login_required(login_url="/login/")
+def edit_user(request, id):
+    print("Edit user ", request.method)
+    
+    if request.method == 'POST':
+        print("POST request received for editing user")
+    
+        # Get user data from the form
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        # Fetch the user by ID
+        user = User.objects.get(id=id)
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        if password.strip():  # Only set password if it's not empty
+            user.set_password(password)
+        
+        user.save()
+            
+        return HttpResponseRedirect(reverse('table_user'))
+        
+    context = {'segment': 'Editar'}
+    html_template = loader.get_template('home/form.html')
+    
+    user = User.objects.get(id=id)
+    context['user'] = user
+
+    return HttpResponse(html_template.render(context, request))
+
+@login_required(login_url="/login/")
+def edit_role_user(request, id):
+    print("Edit user role ", request.method)
+    
+    if request.method == 'POST':
+        print("POST request received for editing user role")
+    
+        # Get the new role from the form
+        new_role = request.POST.get('role')
+        
+        # Validate that the new role exists
+        group = Group.objects.get(name=new_role)
+        
+        # Fetch the user by ID
+        user = User.objects.get(id=id)
+        
+        # Clear existing groups and add the new one
+        user.groups.clear()
+        user.groups.add(group)
+        
+        user.save()
+            
+        return HttpResponseRedirect(reverse('table_user'))
+
+    return HttpResponseRedirect(reverse('table_user'))  
+
+@login_required(login_url="/login/")
+def desactivate_or_activate_user(request, id):
+    print("Desactivating or Activating user ", request.method)
+    
+    if request.method == 'POST':
+        print("POST request received to desactivate or activate user")
+    
+        # Fetch the user by ID
+        user = User.objects.get(id=id)
+        
+        # Desactivate or Activate the user
+        user.is_active = not user.is_active
+        user.save()
+        
+        return HttpResponseRedirect(reverse('table_user'))
+    
+    return HttpResponseRedirect(reverse('table_user'))
 
 @login_required(login_url="/login/")
 def validar_factura(request):
