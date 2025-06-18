@@ -31,7 +31,10 @@ urlpatterns = [
     path('facturas/detalles/', views.detalles_factura, name='detalles_factura'),
 
     #formulario de facturas 
-    path('facturas/agregar/', views.form_facturas, name='form_facturas'),
+    path('facturas/formulario/', views.form_facturas, name='form_facturas'),
+
+    # función facturas
+    path('facturas/agregar/', views.agregar_factura, name='agregar_facturas'),
 
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),
