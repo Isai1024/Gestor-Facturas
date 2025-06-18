@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render
 from .models import Factura
 from django.utils import timezone
@@ -85,17 +85,21 @@ def list_users(request):
     context = {'segment': 'tables'}
     html_template = loader.get_template('home/view_users.html')
     
+    # Fetch all users and order them by ID
     users = User.objects.all().order_by('id')
     context['users'] = users
     
     return HttpResponse(html_template.render(context, request))
 
+# Add a new user with login required
 @login_required(login_url="/login/")
 def view_user(request):
     print("Adding user ", request.method)
     
     if request.method == 'POST':
         print("POST request received")
+    
+        # Get user data from the form
         username = request.POST.get('username')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -103,16 +107,10 @@ def view_user(request):
         password = request.POST.get('password')
         role = request.POST.get('role')
         
-        print("Username:", username)
-        print("First Name:", first_name)
-        print("Last Name:", last_name)
-        print("Email:", email)
-        print("Role:", role)  
-        print("Password:", password)
-        
-        
+        # Validate that the role exists
         group = Group.objects.get(name=role)
         
+        # Create the user
         user = User.objects.create_user(
             username=username,
             first_name=first_name,
@@ -123,6 +121,7 @@ def view_user(request):
             
         user.save()
             
+        # Add the user to the specified group
         user.groups.add(group)
             
         return HttpResponseRedirect(reverse('table_user'))
