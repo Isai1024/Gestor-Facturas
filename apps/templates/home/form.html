@@ -5,46 +5,81 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="mb-0">Agregar Usuario</h3>
-        </div>
-        <div id="app" class="card-body">
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-              <label for="username">Nombre de usuario</label>
-              <input v-model="username" type="text" class="form-control" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-              <label for="first_name">Nombre</label>
-              <input v-model="first_name" type="text" class="form-control" id="first_name" name="first_name" required>
-            </div>
-            <div class="form-group">
-              <label for="last_name">Apellido</label>
-              <input v-model="last_name" type="text" class="form-control" id="last_name" name="last_name" required>
-            </div>
-            <div class="form-group">
-              <label for="email">Correo electrónico</label>
-              <input v-model="email" type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-              <label for="password">Contraseña</label>
-              <input v-model="password" type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-              <label for="role">Rol</label>
-              <select v-model="role" class="form-control" id="role" name="role" required>
-                <option disabled value="">Selecciona una opción</option>
-                <option value="operador">Operador</option>
-                <option value="admin">Administrador</option>
-                <option value="capturista">Capturista</option>
-            </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+    <div id="app" class="col-lg-8">
+      {% if 'Agregar' in segment %}
+        <div class="card">
+          <div class="card-header">
+            <h3 class="mb-0">Agregar Usuario</h3>
           </div>
-        </form>
-      </div>
+          <div class="card-body">
+          <form @submit.prevent="submitForm">
+            <div class="form-group">
+                <label for="username">Nombre de usuario</label>
+                <input v-model="username" type="text" class="form-control" id="username" name="username" required>
+              </div>
+              <div class="form-group">
+                <label for="first_name">Nombre</label>
+                <input v-model="first_name" type="text" class="form-control" id="first_name" name="first_name" required>
+              </div>
+              <div class="form-group">
+                <label for="last_name">Apellido</label>
+                <input v-model="last_name" type="text" class="form-control" id="last_name" name="last_name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input v-model="email" type="email" class="form-control" id="email" name="email" required>
+              </div>
+              <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input v-model="password" type="password" class="form-control" id="password" name="password" required>
+              </div>
+              <div class="form-group">
+                <label for="role">Rol</label>
+                <select v-model="role" class="form-control" id="role" name="role" required>
+                  <option disabled value="">Selecciona una opción</option>
+                  <option value="operador">Operador</option>
+                  <option value="admin">Administrador</option>
+                  <option value="capturista">Capturista</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+          </form>
+          </div>
+        </div>
+      {% elif 'Editar' in segment %}
+        <div class="card">
+          <div class="card-header">
+            <h3 class="mb-0">Editar Usuario</h3>
+          </div>
+          <div class="card-body">
+          <form @submit.prevent="editForm">
+            <div class="form-group">
+                <label for="username">Nombre de usuario</label>
+                <input v-model="username" type="text" class="form-control" id="username" name="username" required>
+              </div>
+              <div class="form-group">
+                <label for="first_name">Nombre</label>
+                <input v-model="first_name" type="text" class="form-control" id="first_name" name="first_name" required>
+              </div>
+              <div class="form-group">
+                <label for="last_name">Apellido</label>
+                <input v-model="last_name" type="text" class="form-control" id="last_name" name="last_name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input v-model="email" type="email" class="form-control" id="email" name="email" required>
+              </div>
+              <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input v-model="password" type="password" class="form-control" id="password" name="password">
+              </div>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+          </form>
+          </div>
+        </div>
+      {% else %}
+        <script>window.location.href = "{% url 'table_user' %}";</script>
+      {% endif %}
     </div>
   </div>
 
@@ -98,6 +133,37 @@
                       ${error.responseText} 
                     </div>`;
                 });
+            },
+            editForm(){
+
+                const formData = {
+                    username: this.username,
+                    first_name: this.first_name,
+                    last_name: this.last_name,
+                    email: this.email,
+                    password: this.password,
+                    role: this.role,
+                    csrfmiddlewaretoken: private_keys.CSRF_MIDDLEWARE_TOKEN
+                };
+
+                $.post("{% url 'edit_user' user.id %}", formData, function(data) {
+                    console.log('Success:', data);
+                    window.location.href = "{% url 'table_user' %}";
+                }).fail(function(error) {
+                    console.error('Error:', error);
+                    err.innerHTML = `<div class="alert alert-danger" role="alert">
+                      ${error.responseText} 
+                    </div>`;
+                });
+            }
+        },
+        mounted() {
+            // If editing a user, populate the form with existing data
+            if ("{{ segment }}" === "Editar") {
+                this.username = "{{ user.username }}";
+                this.first_name = "{{ user.first_name }}";
+                this.last_name = "{{ user.last_name }}";
+                this.email = "{{ user.email }}";
             }
         }
     }).mount('#app');

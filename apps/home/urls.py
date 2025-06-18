@@ -16,6 +16,12 @@ urlpatterns = [
     
     path('usuarios/agregar', views.view_user, name='view_user'),
 
+    path('usuarios/editar/<int:id>', views.edit_user, name='edit_user'),
+
+    path('usuarios/rol/<int:id>', views.edit_role_user, name='edit_role_user'),
+
+    path('usuarios/eliminar/<int:id>', views.desactivate_or_activate_user, name='delete_or_active_user'),
+
     #facturas
     path('facturas', views.validar_factura, name='validar_factura'),
     
