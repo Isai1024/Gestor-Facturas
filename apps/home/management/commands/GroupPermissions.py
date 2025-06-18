@@ -6,7 +6,7 @@ class Command(BaseCommand):
         # Crear grupo si no existe
         groupAdmin, createdAdmin = Group.objects.get_or_create(name='admin')
         groupOperador, createdOperador = Group.objects.get_or_create(name='operador')
-        groupCapturista, createdCapturista = Group.objects.get_or_create(name='capturistas')
+        groupCapturista, createdCapturista = Group.objects.get_or_create(name='capturista')
 
         if createdAdmin:
             self.stdout.write(self.style.SUCCESS(f'Grupo "{groupAdmin.name}" creado.'))
