@@ -14,7 +14,7 @@ class Command(BaseCommand):
             return
 
         factura1 = Factura.objects.create(
-            estatus='aprueba',
+            estatus='deniega',
             fecha=datetime(2024, 4, 15, 10, 30),
             cliente='Empresa de Prueba S.A. de C.V.',
             usuario=usuario,

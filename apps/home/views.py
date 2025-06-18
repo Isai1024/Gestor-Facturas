@@ -144,3 +144,10 @@ def detalles_factura(request):
 
     html_template = loader.get_template('home/visualizacionFactura.html')
     return HttpResponse(html_template.render(context, request))
+
+@login_required(login_url="/login/")
+def form_facturas(request):
+    context = {'segment': 'Facturas'}
+
+    html_template = loader.get_template('home/form-facturas.html')
+    return HttpResponse(html_template.render(context, request))
