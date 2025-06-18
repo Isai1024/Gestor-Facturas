@@ -13,8 +13,8 @@
                 <a href="#"><i class="fas fa-home"></i></a>
               </li>
               <li class="breadcrumb-item"><a href="{% url 'table_user' %}">Usuarios</a></li>
-              {% if 'add_user' in segment %} 
-                <li class="breadcrumb-item active" aria-current="page">Agregar Usuario</li>
+              {% if not 'tables' in segment %} 
+                <li class="breadcrumb-item active" aria-current="page">{{segment}} Usuario</li>
               {% endif %}
             </ol>
           </nav>
@@ -33,11 +33,13 @@
         <div class="card-header border-0">
           <h3 class="mb-0">Usuarios Almacenados</h3>
           <div class="col-lg-12 col-5 text-right">
-              <a href="{% url 'view_user'%}" class="btn btn-sm btn-neutral">
+            {% if 'tables' in segment %}
+            <a href="{% url 'view_user'%}" class="btn btn-sm btn-neutral">
                 <i class="fas fa-plus"></i>
                 Agregar usuario
               </a>
-            </div>
+            {% endif %}
+          </div>
         </div>
 
         <div class="container">
@@ -47,6 +49,9 @@
           {% block user_form %}
           {% endblock user_form %}
         </div>
+
+        {% block AlertVueJS %}
+        {% endblock AlertVueJS %}
 
         {% block users_table %}
         {% endblock users_table %}
