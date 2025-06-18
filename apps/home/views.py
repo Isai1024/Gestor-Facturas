@@ -14,21 +14,27 @@ from .models import Factura
 from django.utils import timezone
 from datetime import timedelta
 
+@login_required(login_url="/login/")
 def index(request):
     ahora = timezone.now()
     inicio_mes_actual = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     inicio_mes_pasado = (inicio_mes_actual - timedelta(days=1)).replace(day=1)
     fin_mes_pasado = inicio_mes_actual - timedelta(seconds=1)
 
-    # Conteos para el mes actual
-    facturas_este_mes = Factura.objects.filter(fecha__gte=inicio_mes_actual)
+    facturas_este_mes = Factura.objects.filter(
+        fecha__gte=inicio_mes_actual,
+        usuario=request.user
+    )
+
     total_este_mes = facturas_este_mes.count()
     aprobadas_este_mes = facturas_este_mes.filter(estatus='aprueba').count()
     denegadas_este_mes = facturas_este_mes.filter(estatus='deniega').count()
     pendientes_este_mes = facturas_este_mes.filter(estatus='subida').count()
 
-    # Conteos para el mes pasado2
-    facturas_mes_pasado = Factura.objects.filter(fecha__range=(inicio_mes_pasado, fin_mes_pasado))
+    facturas_mes_pasado = Factura.objects.filter(
+        fecha__range=(inicio_mes_pasado, fin_mes_pasado),
+        usuario=request.user
+    )
     total_mes_pasado = facturas_mes_pasado.count()
     aprobadas_mes_pasado = facturas_mes_pasado.filter(estatus='aprueba').count()
     denegadas_mes_pasado = facturas_mes_pasado.filter(estatus='deniega').count()
@@ -52,6 +58,29 @@ def index(request):
     }
 
     return render(request, 'home/index.html', context)
+
+
+@login_required(login_url="/login/")
+def profile_view(request):
+    ahora = timezone.now()
+    inicio_mes_actual = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    facturas_este_mes = Factura.objects.filter(
+        fecha__gte=inicio_mes_actual,
+        usuario=request.user
+    )
+
+    aprobadas_este_mes = facturas_este_mes.filter(estatus='aprueba').count()
+    denegadas_este_mes = facturas_este_mes.filter(estatus='deniega').count()
+    pendientes_este_mes = facturas_este_mes.filter(estatus='subida').count()
+
+    context = {
+        'facturas_pendientes': pendientes_este_mes,
+        'facturas_aprobadas': aprobadas_este_mes,
+        'facturas_denegadas': denegadas_este_mes,
+    }
+
+    return render(request, 'home/profile.html', context)
 
 @login_required(login_url="/login/")
 def pages(request):

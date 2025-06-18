@@ -1,28 +1,30 @@
-from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from apps.home.models import Factura
-from decimal import Decimal
 from datetime import datetime
+from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
+    help = 'Crea datos de prueba para las gráficas'
+
     def handle(self, *args, **kwargs):
-        try:
-            usuario = User.objects.get(id=1)  
-        except User.DoesNotExist:
-            self.stdout.write(self.style.ERROR("El usuario con ID=1 no existe."))
+        usuario = User.objects.first()
+        if not usuario:
+            self.stdout.write(self.style.ERROR("No hay usuarios en la base de datos."))
             return
+
+        # Simulación de archivo PDF falso (en memoria)
+        archivo_simulado = ContentFile(b"%PDF-1.4\n%Fake PDF content\n", name="ejemplo.pdf")
 
         factura1 = Factura.objects.create(
             estatus='deniega',
-            fecha=datetime(2024, 4, 15, 10, 30),
-            cliente='Empresa de Prueba S.A. de C.V.',
+            cliente='Empresa Falsa',
             usuario=usuario,
-            nombreArchivo='factura_unica',
-            extension=ContentFile(b'%PDF-1.4 ... contenido simulado ...', name='factura_unica.pdf'),
-            total=Decimal('95344.56'),
-            direccion='Av. Prueba #123, Ciudad Ejemplo, MX',
-            concepto='Servicio de ejemplo por consultoría técnica',
+            archivo=archivo_simulado,
+            total=4567.89,
+            direccion='Calle Inventada 999',
+            concepto='Servicios falsos para demo',
+            fecha=datetime(2025, 6, 15, 10, 30)
         )
 
-        self.stdout.write(self.style.SUCCESS(f"Factura creada: ID {factura1.id}, nombre {factura1.nombreArchivo}"))
+        self.stdout.write(self.style.SUCCESS(f"Factura creada: {factura1}"))
